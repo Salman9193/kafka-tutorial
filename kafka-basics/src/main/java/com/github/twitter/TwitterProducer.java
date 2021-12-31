@@ -162,6 +162,13 @@ public class TwitterProducer {
             prop.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"127.0.0.1:9092");
             prop.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             prop.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class.getName());
+
+            //safe Produce
+            prop.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+            prop.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,"true");
+            prop.setProperty(ProducerConfig.RETRIES_CONFIG,Integer.toString(Integer.MAX_VALUE));
+            prop.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION,"5");
+
             //create producer
             KafkaProducer<String,String> producer = new KafkaProducer<String, String>(prop);
             return producer;
