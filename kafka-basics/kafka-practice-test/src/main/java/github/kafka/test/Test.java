@@ -1,4 +1,4 @@
-package com.github.kafka.test;
+package github.kafka.test;
 
 public class Test {
     public static void main(String[] args) {

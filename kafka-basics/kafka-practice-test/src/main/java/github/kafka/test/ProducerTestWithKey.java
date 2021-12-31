@@ -1,4 +1,4 @@
-package com.github.kafka.test;
+package github.kafka.test;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -7,12 +7,11 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
 import java.util.Properties;
 
-public class ProducerTest {
+public class ProducerTestWithKey {
     public static void main(String[] args) {
-        Logger logger = LoggerFactory.getLogger(ProducerTest.class);
+        Logger logger = LoggerFactory.getLogger(ProducerTestWithKey.class);
         //create producer properties
         Properties prop = new Properties();
         prop.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"127.0.0.1:9092");
@@ -24,10 +23,12 @@ public class ProducerTest {
         //produce and send data
         int i = 0;
         while(i<10){
-            ProducerRecord<String,String> producerRecord = new ProducerRecord<>("Topic1", "second message " + i);
+            String key = "key_id_" + Integer.toString(i);
+            ProducerRecord<String,String> producerRecord = new ProducerRecord<>("Topic1", key,"second message " + i);
             producer.send(producerRecord,(recordMetadata, e) -> {
                 if(e == null){
                     logger.info("recordMetadata sent : " +
+                            "\n key : " + key +
                             "\n Topic : " + recordMetadata.topic()  +
                             "\n Partition : " + recordMetadata.partition() +
                             "\n Offset : " + recordMetadata.offset() +

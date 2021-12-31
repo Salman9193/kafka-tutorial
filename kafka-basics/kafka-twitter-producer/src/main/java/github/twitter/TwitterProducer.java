@@ -1,6 +1,5 @@
-package com.github.twitter;
+package github.twitter;
 
-import com.google.common.collect.Lists;
 import com.twitter.hbc.ClientBuilder;
 import com.twitter.hbc.core.Client;
 import com.twitter.hbc.core.Constants;
@@ -163,11 +162,16 @@ public class TwitterProducer {
             prop.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             prop.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class.getName());
 
-            //safe Produce
+            //safe Producer
             prop.setProperty(ProducerConfig.ACKS_CONFIG, "all");
             prop.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,"true");
             prop.setProperty(ProducerConfig.RETRIES_CONFIG,Integer.toString(Integer.MAX_VALUE));
             prop.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION,"5");
+
+            // high through put producer
+            prop.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG,"snappy");
+            prop.setProperty(ProducerConfig.LINGER_MS_CONFIG,"20");
+            prop.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, Integer.toString(32*1024));
 
             //create producer
             KafkaProducer<String,String> producer = new KafkaProducer<String, String>(prop);
