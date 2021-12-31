@@ -133,6 +133,97 @@ Examples :
 		Zookeeper by design operates with odd number of servers (3,5,7)
 		Zookeeper has a leader (handle writes) rest of the servers are the followers (handle reads)
 		Zookeeper does not store the consumer offsets with Kafka
+		
+
+Application : 
+
+	Read tweets from Twitter api => Twitter Producer => Kafka Broker => Consume messages from the topic => ingest in database/elastic search
+
+Twitter Application :
+
+	Twitter Producer : 
+
+		Twitter hose bird client :  https://github.com/twitter/hbc 
+
+
+
+Producer Configurations : 
+
+	acks : 
+	
+	0,1,all
+	
+	0 : no ack is considered by producer
+	
+	1 : ack from only leader is considered from producer (partial durability)
+	
+	all : acks from leader and  in-sync replicas (durability)
+
+	min.insync.replicas
+
+Idempotent Producers:
+
+	The idempotent producer feature addresses the acks issues ensuring that messages always get delivered, in the right order and without duplicates.
+
+	Limitation 1: Acks=All
+
+		You can choose not to set acks at all, and by using enable.idempotence=true, the acks configuration will automatically be set to all for you.
+
+	Limitation 2: max.in.flight.requests.per.connection <= 5
+
+		You must either leave max.in.flight.requests.per.connection (alias max.in.flight) left unset so that it be automatically set for you or manually set it to 5 or less. If you leave it explicitly set to a value higher than 5 you’ll get error.
+
+Compression : 
+
+	Producer usually send data that is text-based, for example with JSON data
+
+	In this case , it is important to apply compression to the producer.
+
+	Compression is enabled at the producer level and doesnt require andy configuration change in the broker or the the consumers
+
+	("compression,type") Compression type can be "none" (default), "gzip", "lz4", "snappy"
+
+	Compression is more effective the bigger the batch of message being sent to Kafka !
+
+	Link : benchmark : https://blog.cloudflare.com/squeezing-the-firehose/
+
+
+Message compression : 
+
+	Compressed batch has the following advantage : 
+
+		Much smaller producer request size ( compression ratio upto 4x)
+		Faster to transfer data over the network => less latency
+		Better throughput
+		Better disk utilization in Kafka ( stored messages on disk are smaller )
+
+	Disadvantages :
+
+		Producers must commit some CPU cycles to compression
+		Consumers must commit some CPU cycles to decompression
+
+	Overall:
+
+		Consider testing snappy or lz4 for optimal speed/compression ratio
+
+	 Find acompresion allgorith that gives you the best performance for your specific data. Test all of them
+
+	 Consider tweaking linger.ms and batch.size to have bigger batches, and therefore more compression and higher throughput
+
+
+	 linger.ms and batch.size : 
+
+	 	Number of ms a producer is willing to wait before sending a batch out (default 0)
+
+	 	By introducing some lag , we increase the chances of sending messages together in a batch
+
+	 	So at the expense of introducing a small delay, we can increase throughput, compression and efficiency of our producer
+
+	 	batch.size : Maximum number of bytes that will be included in a batch. The default is 16 Kb
+
+	 	A batch is allocated per partition, so make sure that you dont set it to a number that is too high , otherwise you will run waste memory !
+
+	 	average batch size metric can be monitored using Kafka Producer Metric 
 
 
 # CLI
