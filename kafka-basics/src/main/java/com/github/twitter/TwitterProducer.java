@@ -18,39 +18,61 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class TwitterProducer {
-        //read from config file properties
-        //TODO: fetch from vault
-        private static String consumer_key = "oBwggHjNiZpETTy6uQfFs8ygZ";
-        private static String consumer_secret = "qWxcX3eFIzu3oUG2SMlg0dcwsI2GhIKJnFUKmz6kJkWEP7VsNl";
-        private static String token = "1210576135823585281-aSnJP6OgqCjBJ9bRwLB7ZkP7jvSyxT";
-        private static String tokenSecret = "GHfVd37yX7fqtpa0QeS9RTbc338s4T6ktPaJ8bnRe6BzY";
-
-
+        //TODO: fetch from vault and spring
+        private static String consumer_key;
+        private static String consumer_secret;
+        private static String token;
+        private static String tokenSecret;
 
         /** Set up your blocking queues: Be sure to size these properly based on expected TPS of your stream */
         private BlockingQueue<String> msgQueue;
         private BlockingQueue<Event> eventQueue;
-        List<String> terms = Lists.newArrayList("twitter", "api");
-        Logger logger = LoggerFactory.getLogger(TwitterProducer.class);
+        List<String> terms ;
         Client twitterClient;
         String topicName;
+        Logger logger = LoggerFactory.getLogger(TwitterProducer.class);
 
         public TwitterProducer(){
             msgQueue = new LinkedBlockingQueue<String>(100000);
             eventQueue = new LinkedBlockingQueue<Event>(1000);
-            topicName = "twitter_tweets";
+            updateConfigurationFromPropertiesFile();
         }
 
-        public static void main(String[] args){
-            new TwitterProducer().run();
+    private void updateConfigurationFromPropertiesFile() {
+        try (InputStream input = this.getClass().getClassLoader().getResourceAsStream("twitter-keys.properties")) {
+            Properties prop = new Properties();
+            if (input == null) {
+                logger.info("Sorry, unable to find config.properties");
+                return;
+            }
 
+            //load a properties file from class path, inside static method
+            prop.load(input);
+            consumer_key = prop.getProperty("twitter.api.consumer.key");
+            consumer_secret = prop.getProperty("twitter.api.consumer.secret");
+            token = prop.getProperty("twitter.api.token");
+            tokenSecret = prop.getProperty("twitter.api.tokenSecret");
+            topicName = prop.getProperty("twitter.kafka.producer.topic.name");
+            terms = Arrays.stream(prop.getProperty("twitter.api.search.terms").split(",")).collect(Collectors.toList());
+
+        } catch (IOException ex) {
+            logger.info("IO Exception while fetching properties : ", ex);
+        }
+    }
+
+    public static void main(String[] args){
+            new TwitterProducer().run();
         }
 
         public void run() {
