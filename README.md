@@ -345,3 +345,84 @@ Consumer with keys :
 
 	Conduktor : https://www.conduktor.io/
 	Conduktor allows you to perform all the administrative tasks on Kafka (such as creating topics, partitions, etc), as well as produce and consume
+	
+	
+# Delivery Semantics : 
+
+	At most once : 
+		
+		Offsets are committed as soon as the message batch is received. If the processing goes wrong , the message will be lost. (it wont be read again)
+
+	At least once : 
+
+		Offsets are committed after the message is processed. if processing goes wrong, the message will be read again.This can result in duplicate processing of messages.
+		Make sure the processing of the message is idempotent (processing of the same message again would not cause any impact)
+
+	Exactly once : 
+
+		Kafka -> Kafka workflows (Streams API)
+
+
+Consumer Poll Behaviour:
+	
+	Kafka Consumers have a poll model while many other messaging bus in enterprises have a push mechanism model
+
+	allows how the consumer want to control where in the log they want to consume and how fast and gives the ability to replay the messages/events
+
+	fetch.min.bytes : 
+
+		controls how much data you want to pull atleast on each request.
+
+		Helps improving the throughput and decreasing the request number
+
+		at the cost of latency
+
+	max.poll.records : (500 by default)
+
+		controls how many records to receive per poll request
+
+		increase if your messages are small and have a lot of available RAM
+
+		Good to monitor how many records are polled per request
+
+	max.partitions.fetch.bytes : (default 1 MB) 
+
+		Maximum data returned by broker by broker per partition
+
+		if you read from 100 partitions, you will need a lot of memory (RAM)
+
+	fetch.max.bytes : (default 50 MB)
+
+		Maximum data returned for each fetch request (covers multiple partition)
+
+		The consumer performs multiple fetches in parallel
+
+Consumer Offset commit Stratefies :
+
+	1. enable.auto.commit=true : syncronous process of batching
+
+	2. enable.auto.commit=false : manually commit of offsets
+
+Consumer internal threads : 
+
+	session.timeout.ms : (default 10 seconds)
+
+		Heartbeats sent periodically to the broker
+
+		if no heartbeat is sent during that period, the consumer is considered to be dead
+
+		Set even lower timeout session to consumer rebalances
+
+
+	heartbeat.interval.ms : (default 3 ms)
+
+		How often to send heartbeat
+
+		usually send to 1/3rd of session.timeout.ms 
+
+	max.poll.interval.ms : (default 5 minutes) 
+
+		Maximum amount of time between two .poll() calls before declaring the consumer dead
+
+		particularly relevant for Big Data framework like Spark in case the processing takes time
+
