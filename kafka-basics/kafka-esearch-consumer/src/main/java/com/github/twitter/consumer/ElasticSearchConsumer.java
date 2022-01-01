@@ -48,6 +48,22 @@ public class ElasticSearchConsumer {
         //subscribe to topics
         consumer.subscribe(Collections.singleton("twitter_tweets"));
 
+        Runtime.getRuntime().addShutdownHook(new Thread(
+                () -> {
+                    logger.info("Shutting down Elastic Search Consumer");
+                    logger.info("closing kafka consumer ...");
+                    consumer.close();
+                    logger.info("kafka consumer closed ...");
+                    logger.info("closing elastic client ...");
+                    try {
+                        client.close();
+                    } catch (IOException e) {
+                        logger.error("Exception : ",e);
+                    }
+                    logger.info("Elastic Search Consumer down ...");
+                }
+        ));
+
         //poll for new data
         while(true){
             ConsumerRecords<String,String> records = consumer.poll(Duration.ofMillis(100));
@@ -80,6 +96,8 @@ public class ElasticSearchConsumer {
 
         }
 //        client.close();
+
+
 
 
 
