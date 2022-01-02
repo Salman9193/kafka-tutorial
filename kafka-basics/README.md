@@ -11,6 +11,8 @@ To start zookeeper and kafka
   
     Twitter producer and elastic search consumer applications in docker (WIP) 
     
+    Checkout : https://betterprogramming.pub/kafka-docker-run-multiple-kafka-brokers-and-zookeeper-services-in-docker-3ab287056fd5 
+    
  ## Kubernetes Minikube (WIP)
  
  
