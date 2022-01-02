@@ -13,6 +13,8 @@ To start zookeeper and kafka
     
 
 #### Checkout : https://betterprogramming.pub/kafka-docker-run-multiple-kafka-brokers-and-zookeeper-services-in-docker-3ab287056fd5 
+####            https://github.com/d1egoaz/minikube-kafka-cluster
+####            https://kubernetes.io/docs/tutorials/stateful-application/zookeeper/
     
  ## Kubernetes Minikube (WIP)
  
